@@ -144,28 +144,33 @@ input:disabled, select:disabled { background-color: #f8f9fa; color: #6c757d; }
 /* --- ESTILOS PARA CHECKBOXES DE BÚSQUEDA --- */
 .checkbox-container {
     display: flex;
-    flex-wrap: wrap; /* Permite que bajen a la siguiente línea */
-    gap: 10px;
-    padding: 8px;
+    flex-direction: column; /* Cambiamos a columna para que sea una lista vertical limpia */
+    gap: 8px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
-    max-height: 120px; /* Si son muchos, hace scroll */
-    overflow-y: auto;
+    
+    /* CAMBIO CLAVE: Aumentamos la altura máxima o la quitamos */
+    max-height: 250px; /* Antes era 120px, con 250px cabrán todos sin problema */
+    
+    overflow-y: auto; /* La barra solo saldrá si realmente no caben */
 }
 
 .checkbox-item {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.85rem;
+    gap: 8px;
+    font-size: 0.95rem; /* Un poco más grande para leer mejor */
     cursor: pointer;
     background: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid #eee;
+    padding: 8px 10px; /* Más espacio interno */
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
 }
 
 .checkbox-item:hover {
     border-color: #0056b3;
+    background-color: #f0f8ff;
 }
