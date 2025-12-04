@@ -1,5 +1,7 @@
 import Cl_mTablaWeb from "./tools/Cl_mTablaWeb.js";
 export const LISTA_LABORATORIOS = ["Lab-01", "Lab-02", "Lab-03", "Lab-04", "Lab-05", "Lab-06"];
+// 🔥 AQUÍ ES DONDE SE GENERAN LOS CHECKBOXES. 
+// Si faltaba "Dañado", al agregarlo aquí aparecerá automáticamente en la búsqueda.
 export const LISTA_ESTADOS = ["Operativo", "En Mantenimiento", "Dañado"];
 // --- 3. CLASE EQUIPO ---
 export default class Cl_mEquipo extends Cl_mTablaWeb {
@@ -11,7 +13,7 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
         this._serial = "";
         this._lab = "Lab-01";
         this._cpu = "";
-        this._ram = 0; // Inicializado como número
+        this._ram = 0;
         this._estado = "Operativo";
         this._fila = "";
         this._puesto = "";
@@ -23,14 +25,13 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
         this.fila = fila;
         this.puesto = puesto;
     }
-    // Setters y Getters (RAM maneja números)
     set serial(v) { this._serial = v.trim().toUpperCase(); }
     get serial() { return this._serial; }
     set lab(v) { this._lab = v; }
     get lab() { return this._lab; }
     set cpu(v) { this._cpu = v.trim(); }
     get cpu() { return this._cpu; }
-    set ram(v) { this._ram = +v; } // Aseguramos conversión a número
+    set ram(v) { this._ram = +v; }
     get ram() { return this._ram; }
     set estado(v) { this._estado = v; }
     get estado() { return this._estado; }
@@ -38,12 +39,12 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
     get fila() { return this._fila; }
     set puesto(v) { this._puesto = v.trim(); }
     get puesto() { return this._puesto; }
-    // --- VALIDACIONES ESTRICTAS ---
+    // --- VALIDACIONES ---
     get serialOk() { return this._serial.length > 0 && this._serial.length <= 6; }
     get labOk() { return LISTA_LABORATORIOS.includes(this._lab); }
     get estadoOk() { return LISTA_ESTADOS.includes(this._estado); }
     get cpuOk() { return this._cpu.length > 0; }
-    get ramOk() { return this._ram > 0; } // RAM debe ser mayor a 0
+    get ramOk() { return this._ram > 0; }
     get filaOk() { return this._fila.length > 0; }
     get puestoOk() { return this._puesto.length > 0; }
     get equipoOk() {

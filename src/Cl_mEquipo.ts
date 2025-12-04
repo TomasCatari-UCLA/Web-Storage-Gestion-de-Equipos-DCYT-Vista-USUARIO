@@ -2,13 +2,17 @@ import Cl_mTablaWeb from "./tools/Cl_mTablaWeb.js";
 
 // --- 1. LISTAS Y TIPOS ACTUALIZADOS ---
 export type TipoLaboratorio = "Lab-01" | "Lab-02" | "Lab-03" | "Lab-04" | "Lab-05" | "Lab-06";
-// CORRECCIÓN: Estados exactos solicitados por tu profesor
+
+// Aseguramos que "Dañado" esté aquí
 export type TipoEstado = "Operativo" | "En Mantenimiento" | "Dañado";
 
 export const LISTA_LABORATORIOS: TipoLaboratorio[] = ["Lab-01", "Lab-02", "Lab-03", "Lab-04", "Lab-05", "Lab-06"];
+
+// 🔥 AQUÍ ES DONDE SE GENERAN LOS CHECKBOXES. 
+// Si faltaba "Dañado", al agregarlo aquí aparecerá automáticamente en la búsqueda.
 export const LISTA_ESTADOS: TipoEstado[] = ["Operativo", "En Mantenimiento", "Dañado"];
 
-// --- 2. INTERFAZ ACTUALIZADA ---
+// --- 2. INTERFAZ ---
 export interface iEquipo {
   id: number | null;
   creadoEl: string | null;
@@ -16,7 +20,7 @@ export interface iEquipo {
   serial: string;
   lab: TipoLaboratorio;
   cpu: string;
-  ram: number; // CORRECCIÓN: Ahora es number
+  ram: number;
   estado: TipoEstado;
   fila: string;
   puesto: string;
@@ -27,7 +31,7 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
   private _serial: string = "";
   private _lab: TipoLaboratorio = "Lab-01";
   private _cpu: string = "";
-  private _ram: number = 0; // Inicializado como número
+  private _ram: number = 0;
   private _estado: TipoEstado = "Operativo";
   private _fila: string = "";
   private _puesto: string = "";
@@ -46,7 +50,6 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
     this.puesto = puesto;
   }
 
-  // Setters y Getters (RAM maneja números)
   set serial(v: string) { this._serial = v.trim().toUpperCase(); }
   get serial(): string { return this._serial; }
   
@@ -56,7 +59,7 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
   set cpu(v: string) { this._cpu = v.trim(); }
   get cpu(): string { return this._cpu; }
   
-  set ram(v: number) { this._ram = +v; } // Aseguramos conversión a número
+  set ram(v: number) { this._ram = +v; }
   get ram(): number { return this._ram; }
   
   set estado(v: TipoEstado) { this._estado = v; }
@@ -68,12 +71,12 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
   set puesto(v: string) { this._puesto = v.trim(); }
   get puesto(): string { return this._puesto; }
 
-  // --- VALIDACIONES ESTRICTAS ---
+  // --- VALIDACIONES ---
   get serialOk(): boolean { return this._serial.length > 0 && this._serial.length <= 6; }
   get labOk(): boolean { return LISTA_LABORATORIOS.includes(this._lab); }
   get estadoOk(): boolean { return LISTA_ESTADOS.includes(this._estado); }
   get cpuOk(): boolean { return this._cpu.length > 0; }
-  get ramOk(): boolean { return this._ram > 0; } // RAM debe ser mayor a 0
+  get ramOk(): boolean { return this._ram > 0; }
   get filaOk(): boolean { return this._fila.length > 0; }
   get puestoOk(): boolean { return this._puesto.length > 0; }
 
@@ -90,7 +93,7 @@ export default class Cl_mEquipo extends Cl_mTablaWeb {
 
   toJSON(): iEquipo {
     return {
-      ...super.toJSON(), // Hereda ID, creadoEl, alias
+      ...super.toJSON(),
       serial: this._serial,
       lab: this._lab,
       cpu: this._cpu,

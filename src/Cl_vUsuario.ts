@@ -7,7 +7,7 @@ import { opcionFicha } from "./tools/core.tools.js";
 export default class Cl_vUsuario extends Cl_vGeneral {
   private vEquipo: Cl_vEquipo;
   
-  // Botones Superiores (SOLO BUSCAR Y FILTRO)
+  // Botones Superiores
   private btBuscar: HTMLButtonElement;
   private btQuitarFiltro: HTMLButtonElement; 
 
@@ -17,13 +17,16 @@ export default class Cl_vUsuario extends Cl_vGeneral {
   private lblTotal: HTMLElement; private lblOperativos: HTMLElement; 
   private lblReparacion: HTMLElement; private lblDañado: HTMLElement;
 
-  // --- ELEMENTOS DE BÚSQUEDA (Iguales a la vista Admin) ---
+  // --- ELEMENTOS DE BÚSQUEDA ---
   private modalBuscar: HTMLElement;
   private inBusSerial: HTMLInputElement; 
-  private slBusLab: HTMLSelectElement; 
+  
+  // CAMBIO 1: Ya no son Select, ahora son Divs contenedores
+  private divBusLab: HTMLDivElement; 
+  private divBusEstado: HTMLDivElement;
+
   private inBusCpu: HTMLInputElement;
   private inBusRam: HTMLInputElement;
-  private slBusEstado: HTMLSelectElement;
   private inBusFila: HTMLInputElement;
   private inBusPuesto: HTMLInputElement;
   
@@ -32,11 +35,9 @@ export default class Cl_vUsuario extends Cl_vGeneral {
 
   constructor() {
     super({ formName: "dcyt" });
-    // Reutilizamos vEquipo pero solo lo invocaremos en modo lectura
     this.vEquipo = new Cl_vEquipo();
     this.vEquipo.show({ ver: false });
 
-    // Botones (SIN btAgregar)
     this.btBuscar = this.crearHTMLButtonElement("btBuscar", { onclick: () => this.abrirBusqueda(), });
     
     this.btQuitarFiltro = this.crearHTMLButtonElement("btQuitarFiltro", { 
@@ -46,7 +47,6 @@ export default class Cl_vUsuario extends Cl_vGeneral {
 
     this.divTabla = this.crearHTMLElement("divTabla", { type: tHTMLElement.CONTAINER, refresh: () => this.mostrarEquipos(), }) as HTMLDivElement;
     
-    // Stats labels
     this.lblTotal = document.getElementById("lblTotal") as HTMLElement;
     this.lblOperativos = document.getElementById("lblOperativos") as HTMLElement;
     this.lblReparacion = document.getElementById("lblReparacion") as HTMLElement;
@@ -55,15 +55,19 @@ export default class Cl_vUsuario extends Cl_vGeneral {
     // --- CONEXIÓN DE BÚSQUEDA ---
     this.modalBuscar = document.getElementById("modalBuscar") as HTMLElement;
     this.inBusSerial = document.getElementById("bus_inSerial") as HTMLInputElement;
-    this.slBusLab = document.getElementById("bus_slLab") as HTMLSelectElement;
+    
+    // CAMBIO 2: Obtener los DIVs en lugar de Selects
+    this.divBusLab = document.getElementById("bus_divLab") as HTMLDivElement;
+    this.divBusEstado = document.getElementById("bus_divEstado") as HTMLDivElement;
+
     this.inBusCpu = document.getElementById("bus_inCpu") as HTMLInputElement;
     this.inBusRam = document.getElementById("bus_inRam") as HTMLInputElement;
-    this.slBusEstado = document.getElementById("bus_slEstado") as HTMLSelectElement;
     this.inBusFila = document.getElementById("bus_inFila") as HTMLInputElement;
     this.inBusPuesto = document.getElementById("bus_inPuesto") as HTMLInputElement;
 
-    this.llenarSelectBusqueda(this.slBusLab, LISTA_LABORATORIOS);
-    this.llenarSelectBusqueda(this.slBusEstado, LISTA_ESTADOS);
+    // CAMBIO 3: Llenar con checkboxes en lugar de <option>
+    this.generarCheckboxes(this.divBusLab, LISTA_LABORATORIOS);
+    this.generarCheckboxes(this.divBusEstado, LISTA_ESTADOS);
 
     this.btBuscarCancelar = document.getElementById("btBuscarCancelar") as HTMLButtonElement;
     this.btBuscarCancelar.onclick = () => this.ocultarBusqueda();
@@ -74,14 +78,33 @@ export default class Cl_vUsuario extends Cl_vGeneral {
   set controlador(controlador: Cl_controlador) { super.controlador = controlador; this.vEquipo.controlador = controlador; }
   get controlador(): Cl_controlador | null { return super.controlador; }
 
-  llenarSelectBusqueda(select: HTMLSelectElement, datos: string[]) {
-      select.innerHTML = '<option value="">(Todos)</option>';
+  // CAMBIO 4: Nueva función para crear checkboxes dinámicos
+  generarCheckboxes(contenedor: HTMLElement, datos: string[]) {
+      contenedor.innerHTML = "";
       datos.forEach(dato => { 
-          let option = document.createElement("option"); 
-          option.value = dato; 
-          option.text = dato; 
-          select.add(option); 
+          // Creamos un label que envuelve al input para mejor click
+          let label = document.createElement("label");
+          label.className = "checkbox-item";
+          
+          let input = document.createElement("input");
+          input.type = "checkbox";
+          input.value = dato;
+          
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(dato));
+          
+          contenedor.appendChild(label);
       });
+  }
+
+  // CAMBIO 5: Función auxiliar para leer qué está marcado
+  obtenerSeleccionados(contenedor: HTMLElement): string[] {
+      let seleccionados: string[] = [];
+      let inputs = contenedor.querySelectorAll("input[type='checkbox']:checked");
+      inputs.forEach((input: any) => {
+          seleccionados.push(input.value);
+      });
+      return seleccionados;
   }
 
   mostrarEquipos(listaFiltrada?: iEquipo[]) {
@@ -89,14 +112,13 @@ export default class Cl_vUsuario extends Cl_vGeneral {
     let equipos = listaFiltrada ? listaFiltrada : this.controlador?.dtEquipos;
     if (!equipos) return;
 
-    // Manejo visual de botón "Quitar Filtro"
     if (listaFiltrada) {
         this.btQuitarFiltro.style.display = "flex"; 
     } else {
         this.btQuitarFiltro.style.display = "none"; 
     }
 
-    // Actualizar Stats
+    // Stats
     let listaParaStats = equipos;
     let total = listaParaStats.length;
     let operativos = listaParaStats.filter(e => e.estado === "Operativo").length;
@@ -108,7 +130,6 @@ export default class Cl_vUsuario extends Cl_vGeneral {
     if(this.lblReparacion) this.lblReparacion.innerHTML = reparacion.toString();
     if(this.lblDañado) this.lblDañado.innerHTML = danado.toString();
     
-    // Generar Tabla HTML (SOLO CON BOTÓN CONSULTAR)
     let html = "";
     if (equipos.length === 0) html = `<div style="text-align:center; padding:20px; color:#666;">No se encontraron resultados 🔍</div>`;
 
@@ -131,17 +152,21 @@ export default class Cl_vUsuario extends Cl_vGeneral {
     });
     this.divTabla.innerHTML = html;
     
-    // Asignar eventos solo al botón Consultar
     equipos.forEach((equipo: iEquipo, index: number) => {
       let btnC = document.getElementById(`dcyt_btConsultar_${index}`); 
       if(btnC) btnC.onclick = () => this.consultarEquipo(equipo.serial);
     });
   }
 
-  // --- LÓGICA DE BÚSQUEDA (IDÉNTICA AL ADMIN) ---
   abrirBusqueda() { 
+      // Limpiar inputs de texto
       this.inBusSerial.value = ""; this.inBusCpu.value = ""; this.inBusRam.value = "";
-      this.inBusFila.value = ""; this.inBusPuesto.value = ""; this.slBusLab.value = ""; this.slBusEstado.value = "";
+      this.inBusFila.value = ""; this.inBusPuesto.value = ""; 
+      
+      // CAMBIO 6: Desmarcar todos los checkboxes al abrir
+      this.divBusLab.querySelectorAll("input").forEach(i => i.checked = false);
+      this.divBusEstado.querySelectorAll("input").forEach(i => i.checked = false);
+
       this.modalBuscar.style.display = "flex"; 
   }
   
@@ -151,10 +176,13 @@ export default class Cl_vUsuario extends Cl_vGeneral {
 
   ejecutarBusqueda() {
       let sSerial = this.inBusSerial.value.trim().toLowerCase();
-      let sLab = this.slBusLab.value;
+      
+      // CAMBIO 7: Obtener Arrays de seleccionados
+      let sLabs = this.obtenerSeleccionados(this.divBusLab);
+      let sEstados = this.obtenerSeleccionados(this.divBusEstado);
+
       let sCpu = this.inBusCpu.value.trim().toLowerCase();
       let sRam = this.inBusRam.value.trim();
-      let sEstado = this.slBusEstado.value;
       let sFila = this.inBusFila.value.trim().toLowerCase();
       let sPuesto = this.inBusPuesto.value.trim().toLowerCase();
 
@@ -163,10 +191,15 @@ export default class Cl_vUsuario extends Cl_vGeneral {
       let filtrados = todos.filter((e: iEquipo) => {
           let coincide = true;
           if (sSerial && !e.serial.toLowerCase().includes(sSerial)) coincide = false;
-          if (sLab && e.lab !== sLab) coincide = false;
+          
+          // CAMBIO 8: Lógica "Uno o Más". 
+          // Si el array sLabs tiene elementos, verificamos si el e.lab está INCLUIDO en ese array.
+          // Si el array está vacío, significa que el usuario quiere ver TODOS, así que no filtramos.
+          if (sLabs.length > 0 && !sLabs.includes(e.lab)) coincide = false;
+          if (sEstados.length > 0 && !sEstados.includes(e.estado)) coincide = false;
+
           if (sCpu && !e.cpu.toLowerCase().includes(sCpu)) coincide = false;
           if (sRam && String(e.ram) !== sRam) coincide = false;
-          if (sEstado && e.estado !== sEstado) coincide = false;
           if (sFila && e.fila.toLowerCase() !== sFila) coincide = false;
           if (sPuesto && e.puesto.toLowerCase() !== sPuesto) coincide = false;
           return coincide;
@@ -176,22 +209,19 @@ export default class Cl_vUsuario extends Cl_vGeneral {
       this.mostrarEquipos(filtrados);
   }
 
-  // --- NAVEGACIÓN ---
   consultarEquipo(serial: string) { 
       let equipo = this.controlador?.equipo(serial); 
       if (equipo) this.controlador?.activarVista({ vista: "equipo", opcion: opcionFicha.read, objeto: equipo, }); 
   }
 
-  // Manejador de vistas simple para Usuario
   activarVista({ vista, opcion, objeto }: { vista: string; opcion?: opcionFicha; objeto?: Cl_mEquipo; }): void {
     if (vista === "dcyt") { 
         this.show({ ver: true }); 
-        this.mostrarEquipos(); // Refresca la tabla al volver
+        this.mostrarEquipos(); 
         this.vEquipo.show({ ver: false }); 
     } 
     else { 
         this.show({ ver: false }); 
-        // Solo permitimos ver si es opcion READ, por seguridad, aunque la UI no permite otra cosa
         this.vEquipo.show({ ver: true, equipo: objeto, opcion: opcionFicha.read }); 
     }
   }

@@ -141,3 +141,31 @@ input:disabled, select:disabled { background-color: #f8f9fa; color: #6c757d; }
 
 .modal-icon { font-size: 3rem; margin-bottom: 10px; }
 .modal-confirm-box h3 { margin: 0 0 10px 0; color: #333; }
+/* --- ESTILOS PARA CHECKBOXES DE BÚSQUEDA --- */
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que bajen a la siguiente línea */
+    gap: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    max-height: 120px; /* Si son muchos, hace scroll */
+    overflow-y: auto;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.checkbox-item:hover {
+    border-color: #0056b3;
+}
